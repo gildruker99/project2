@@ -55,6 +55,7 @@ public class FibonacciHeap {
         }
         else {
             this.minNode = newNode;
+            firstNode = newNode;
         }
         return newNode;
     }
