@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * FibonacciHeap
@@ -13,9 +14,14 @@ public class FibonacciHeap {
     private HeapNode minNode;
 
     /**
+     * number of Trees in the Heap
+     */
+   private int numofTress;
+
+    /**
      * Pointer to the first node in the heap
      */
-    public static HeapNode firstNode;
+    public HeapNode firstNode;
     /**
      * Number of nodes in the heap
      */
@@ -127,6 +133,29 @@ public class FibonacciHeap {
     private void consolidate() {
         // log bast phi of Integer.MAX_VALUE -> the most nodes we'll have
         int maxDegree = (int) Math.floor((Math.log(size())) / Math.log((1 + Math.sqrt(5)) / 2));
+        List<HeapNode> x = new ArrayList<>();
+        HeapNode toCheck = this.firstNode;
+        HeapNode lastNode = this.firstNode.left;
+        boolean flag = true;
+        while (flag){
+            HeapNode next = toCheck.right;
+            if (next == this.firstNode){
+                flag = false;
+            }
+            int index = toCheck.degree;
+            if (x.get(index)==null){
+                x.add(index,toCheck);
+            }
+            else{
+                while(x.get(toCheck.degree)!=null){
+                    int index1 = toCheck.degree;
+                    toCheck = toCheck.link(x.get(index1));
+                    x.remove(index);
+                }
+                x.add(toCheck.degree,toCheck);
+            }
+            toCheck = next;
+        }
 
     }
 
@@ -145,13 +174,25 @@ public class FibonacciHeap {
         return null;
     }
 
+
+
     /**
      * public void meld (FibonacciHeap heap2)
      * <p>
      * Melds heap2 with the current heap.
      */
     public void meld(FibonacciHeap heap2) {
-        return; // should be replaced by student code
+        HeapNode thisLastNode = this.firstNode.left;
+        HeapNode heap2LastNode = heap2.firstNode.left;
+        thisLastNode.right = heap2.firstNode;
+        heap2.firstNode.left = thisLastNode;
+        heap2LastNode.right = this.firstNode;
+        this.firstNode.left = heap2LastNode;
+        if(this.minNode.key>heap2.minNode.key){
+            this.minNode = heap2.minNode;
+        }
+        this.numOfNodes += heap2.numOfNodes;
+        this.numofTress += heap2.numofTress;
     }
 
     /**
@@ -200,8 +241,8 @@ public class FibonacciHeap {
         HeapNode y = x.parent;
         //check if x isn't root & the Heap invariant has damaged.
         if (y != null && x.key < y.key) {
-            y.cut(x);
-            y.cascadingCut();
+            y.cut(x,this);
+            y.cascadingCut(this);
         }
         if (x.key < minNode.key) {
             minNode = x;
@@ -229,7 +270,7 @@ public class FibonacciHeap {
      * plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return -234; // should be replaced by student code
+        return(-999); // should be replaced by student code
     }
 
     /**
@@ -326,7 +367,7 @@ public class FibonacciHeap {
          *
          * @param x child to be removed
          */
-        public void cut(HeapNode x) {
+        public void cut(HeapNode x,FibonacciHeap h) {
             //remove x from child list of y and decrement y degree.
             x.left.right = x.right;
             x.right.left = x.left;
@@ -340,11 +381,11 @@ public class FibonacciHeap {
             //add x to the Heap
             x.parent = null;
             x.mark = false;
-            x.right = firstNode;
-            x.left = firstNode.left;
+            x.right = h.firstNode;
+            x.left = h.firstNode.left;
             x.left.right = x;
-            firstNode.left = x;
-            firstNode = x;
+            h.firstNode.left = x;
+            h.firstNode = x;
             //updating static fields
             nonMarked++;
             totalCuts++;
@@ -356,15 +397,15 @@ public class FibonacciHeap {
          * and then do the same until the parent is Unmarked
          * O(log(n)) time complexity
          */
-        public void cascadingCut() {
+        public void cascadingCut(FibonacciHeap h) {
             HeapNode z = this.parent;
             //check if there is a parent
             if (z != null) {
                 //check if y is marked
                 if (this.mark) {
                     //if marked, cut it
-                    z.cut(this);
-                    z.cascadingCut();
+                    z.cut(this,h);
+                    z.cascadingCut(h);
                 } else {
                     //if y is unmarked, set to mark
                     this.mark = true;
