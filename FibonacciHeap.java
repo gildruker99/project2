@@ -16,7 +16,7 @@ public class FibonacciHeap {
     /**
      * number of Trees in the Heap
      */
-   private int numofTress;
+    private int numOfTrees;
 
     /**
      * Pointer to the first node in the heap
@@ -75,6 +75,7 @@ public class FibonacciHeap {
             firstNode = newNode;
         }
         numOfNodes++;
+        numOfTrees+=1;
         return newNode;
     }
 
@@ -132,34 +133,58 @@ public class FibonacciHeap {
      */
     private void consolidate() {
         // log bast phi of Integer.MAX_VALUE -> the most nodes we'll have
+        HeapNode next;
         int maxDegree = (int) Math.floor((Math.log(size())) / Math.log((1 + Math.sqrt(5)) / 2));
-        List<HeapNode> x = new ArrayList<>();
+        HeapNode[] x = new HeapNode[maxDegree+1];
         HeapNode toCheck = this.firstNode;
-        HeapNode lastNode = this.firstNode.left;
         boolean flag = true;
         while (flag){
-            HeapNode next = toCheck.right;
+            next = toCheck.right;
             if (next == this.firstNode){
                 flag = false;
             }
             int index = toCheck.degree;
-            if (x.get(index)==null){
-                x.add(index,toCheck);
+            if (x[index] == null){
+                x[index] = toCheck;
             }
             else{
-                while(x.get(toCheck.degree)!=null){
-                    int index1 = toCheck.degree;
-                    toCheck = toCheck.link(x.get(index1));
-                    x.remove(index);
+                HeapNode toAdd = toCheck;
+                while(x[toAdd.degree]!=null){
+                    int index1 = toAdd.degree;
+                    toAdd = toAdd.link(x[index1]);
+                    x[index1]=null;
                 }
-                x.add(toCheck.degree,toCheck);
+                x[toAdd.degree]=toAdd;
             }
             toCheck = next;
         }
-
+       conHelp(x);
     }
 
 
+    public void conHelp(HeapNode[] x){
+        int i=0;
+        HeapNode first =null;
+        HeapNode temp1 = null;
+        while(i< x.length){
+            if(x[i]!=null) {
+                first = x[i];
+                temp1 = first;
+                i++;
+                break;
+            }
+            i++;
+        }
+        while(i<x.length){
+            if(x[i]!=null){
+                temp1.right = x[i];
+                temp1 = temp1.right;
+            }
+            i+=1;
+        }
+        temp1.right = first;
+        first.left =temp1;
+    }
     /**
      * public HeapNode findMin()
      * <p>
@@ -192,7 +217,7 @@ public class FibonacciHeap {
             this.minNode = heap2.minNode;
         }
         this.numOfNodes += heap2.numOfNodes;
-        this.numofTress += heap2.numofTress;
+        this.numOfTrees += heap2.numOfTrees;
     }
 
     /**
