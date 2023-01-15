@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
 
 /**
  * FibonacciHeap
@@ -46,7 +44,7 @@ public class FibonacciHeap {
      * O(1) complexity
      */
     public boolean isEmpty() {
-        return minNode != null;
+        return minNode == null;
     }
 
     /**
@@ -61,7 +59,7 @@ public class FibonacciHeap {
      */
     public HeapNode insert(int key) {
         HeapNode newNode = new HeapNode(key);
-        if (isEmpty()) {
+        if (!isEmpty()) {
             newNode.right = firstNode;
             newNode.left = firstNode.left;
             firstNode.left.right = newNode;
@@ -99,6 +97,9 @@ public class FibonacciHeap {
              * if y1,y2,y3 are trees, and y2 is the min
              * and y2 children are x1,..,xk, well get y1,x1,..xk,y3
              */
+            if(z.right == z && z.left == z && z == firstNode){
+                firstNode = z.child;
+            }
             HeapNode minLeft = z.left;
             HeapNode zChildLeft = z.child.left;
             z.left = zChildLeft;
@@ -109,11 +110,15 @@ public class FibonacciHeap {
         //remove the min node from heap
         z.left.right = z.right;
         z.right.left = z.left;
+        if (z == firstNode){
+            firstNode = z.right;
+        }
         if (z == z.right) {
             minNode = null;
         }
         //find the new Min
         else {
+            consolidate();
             HeapNode potentialMin = firstNode;
             for (HeapNode y = firstNode.right; y != firstNode; y = y.right) {
                 if (y.key < potentialMin.key) {
@@ -121,7 +126,6 @@ public class FibonacciHeap {
                 }
             }
             minNode = potentialMin;
-            consolidate();
         }
         numOfNodes--;
     }
@@ -135,56 +139,46 @@ public class FibonacciHeap {
         // log bast phi of Integer.MAX_VALUE -> the most nodes we'll have
         HeapNode next;
         int maxDegree = (int) Math.floor((Math.log(size())) / Math.log((1 + Math.sqrt(5)) / 2));
-        HeapNode[] x = new HeapNode[maxDegree+1];
-        HeapNode toCheck = this.firstNode;
-        boolean flag = true;
-        while (flag){
-            next = toCheck.right;
-            if (next == this.firstNode){
-                flag = false;
-            }
-            int index = toCheck.degree;
-            if (x[index] == null){
-                x[index] = toCheck;
-            }
-            else{
-                HeapNode toAdd = toCheck;
-                while(x[toAdd.degree]!=null){
-                    int index1 = toAdd.degree;
-                    toAdd = toAdd.link(x[index1]);
-                    x[index1]=null;
+        HeapNode[] degTreesArr = new HeapNode[maxDegree];
+        HeapNode start = firstNode;
+        HeapNode current = firstNode;
+        do {
+            HeapNode x = current;
+            HeapNode nextCurr = current.right;
+            int deg = x.degree;
+            while (degTreesArr[deg] != null){
+                HeapNode y = degTreesArr[deg];
+                if ( y == start ){
+                    start = start.right;
                 }
-                x[toAdd.degree]=toAdd;
+                if (y == firstNode){
+                    start = y.right;
+                }
+                if ( y == nextCurr){
+                    nextCurr = nextCurr.right;
+                }
+                if (x.key > y.key){
+                    HeapNode tmp = y;
+                    y = x;
+                    x = tmp;
+                }
+                y.link(x,this);
+                degTreesArr[deg] = null;
+                deg++;
             }
-            toCheck = next;
+            degTreesArr[deg] = x;
+            current = nextCurr;
+        } while (current !=start && current !=firstNode);
+        minNode = firstNode;
+        for(HeapNode node : degTreesArr){
+            if (node != null && node.key < minNode.key){
+                minNode = node;
+            }
         }
-       conHelp(x);
     }
 
 
-    public void conHelp(HeapNode[] x){
-        int i=0;
-        HeapNode first =null;
-        HeapNode temp1 = null;
-        while(i< x.length){
-            if(x[i]!=null) {
-                first = x[i];
-                temp1 = first;
-                i++;
-                break;
-            }
-            i++;
-        }
-        while(i<x.length){
-            if(x[i]!=null){
-                temp1.right = x[i];
-                temp1 = temp1.right;
-            }
-            i+=1;
-        }
-        temp1.right = first;
-        first.left =temp1;
-    }
+
     /**
      * public HeapNode findMin()
      * <p>
@@ -193,7 +187,7 @@ public class FibonacciHeap {
      * O(1) complexity
      */
     public HeapNode findMin() {
-        if (isEmpty()) {
+        if (!isEmpty()) {
             return this.minNode;
         }
         return null;
@@ -392,7 +386,7 @@ public class FibonacciHeap {
          *
          * @param x child to be removed
          */
-        public void cut(HeapNode x,FibonacciHeap h) {
+        public void cut(HeapNode x, FibonacciHeap h) {
             //remove x from child list of y and decrement y degree.
             x.left.right = x.right;
             x.right.left = x.left;
@@ -447,7 +441,7 @@ public class FibonacciHeap {
          *
          * @param parent the new parent node.
          */
-        public HeapNode linkhelper(HeapNode parent) {
+        public HeapNode linkhelper(HeapNode parent, FibonacciHeap h) {
             //remove this from his sibling
             this.left.right = right;
             this.right.left = left;
@@ -470,15 +464,19 @@ public class FibonacciHeap {
                 this.mark = false;
                 nonMarked++;
             }
+            if(parent.child == h.firstNode){
+                h.firstNode = parent;
+            }
             return parent;
         }
 
-        public HeapNode link(HeapNode parent) {
+        public HeapNode link(HeapNode parent, FibonacciHeap h) {
             if (this.key < parent.key) {
-                return parent.linkhelper(this);
+                return parent.linkhelper(this,h);
             } else {
-                return this.linkhelper(parent);
+                return this.linkhelper(parent,h);
             }
         }
+
     }
 }
