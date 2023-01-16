@@ -24,6 +24,7 @@ public class FibonacciHeap {
      * Number of nodes in the heap
      */
     private int numOfNodes;
+    public int size = numOfNodes;
     /**
      * Number of unmarked nodes in the heap
      */
@@ -35,6 +36,10 @@ public class FibonacciHeap {
      */
     public static int totalCuts;
 
+    /**
+     * Number of totalLinks so far in the heap
+     */
+    public static int totalLinks;
 
     /**
      * public boolean isEmpty()
@@ -127,6 +132,7 @@ public class FibonacciHeap {
         //remove the min node from heap
         z.left.right = z.right;
         z.right.left = z.left;
+
         if (z == firstNode){
             firstNode = z.right;
         }
@@ -137,14 +143,18 @@ public class FibonacciHeap {
         else {
             consolidate();
             HeapNode potentialMin = firstNode;
+            int numOfTreesCnt = 1;
             for (HeapNode y = firstNode.right; y != firstNode; y = y.right) {
+                numOfTreesCnt++;
                 if (y.key < potentialMin.key) {
                     potentialMin = y;
                 }
             }
             minNode = potentialMin;
+            numOfTrees = numOfTreesCnt;
         }
         numOfNodes--;
+        nonMarked--;
     }
 
     /**
@@ -249,10 +259,13 @@ public class FibonacciHeap {
      * (Note: The size of of the array depends on the maximum order of a tree.)
      */
     public int[] countersRep() {
-        int[] arr = new int[100];
+        int[] arr = new int[minNode.degree+1];
+        arr[minNode.degree] += 1;
+        for (HeapNode y = minNode.right; y != minNode; y = y.right){
+            arr[y.degree] += 1;
+        }
         return arr; //	 to be replaced by student code
     }
-
     /**
      * public void delete(HeapNode x)
      * <p>
@@ -306,7 +319,7 @@ public class FibonacciHeap {
      * plus twice the number of marked nodes in the heap.
      */
     public int potential() {
-        return(-999); // should be replaced by student code
+        return numOfTrees + 2*(numOfNodes-nonMarked); // should be replaced by student code
     }
 
     /**
@@ -318,7 +331,7 @@ public class FibonacciHeap {
      * tree which has larger value in its root under the other tree.
      */
     public static int totalLinks() {
-        return -345; // should be replaced by student code
+        return totalLinks; // should be replaced by student code
     }
 
     /**
@@ -546,6 +559,7 @@ public class FibonacciHeap {
             if(parent.child == h.firstNode){
                 h.firstNode = parent;
             }
+            totalLinks++;
             return parent;
         }
 
