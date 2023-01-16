@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
 
 /**
  * FibonacciHeap
@@ -21,7 +19,7 @@ public class FibonacciHeap {
     /**
      * Pointer to the first node in the heap
      */
-    public HeapNode firstNode;
+    private HeapNode firstNode;
     /**
      * Number of nodes in the heap
      */
@@ -48,6 +46,23 @@ public class FibonacciHeap {
     public boolean isEmpty() {
         return minNode == null;
     }
+
+    public HeapNode getFirst(){
+        return this.firstNode;
+    }
+
+    public int getNumOfNodes(){
+        return (this.numOfNodes);
+    }
+
+    public int getNumOfTrees(){
+        return(this.numOfTrees);
+    }
+
+    public HeapNode getMinNode(){
+        return(this.minNode);
+    }
+
 
     /**
      * public HeapNode insert(int key)
@@ -318,6 +333,7 @@ public class FibonacciHeap {
         return totalCuts;
     }
 
+
     /**
      * public static int[] kMin(FibonacciHeap H, int k)
      * <p>
@@ -359,7 +375,7 @@ public class FibonacciHeap {
         /**
          * Number of children of this node
          */
-        private int degree;
+        public int degree;
         /**
          * True if this node has had a child removed since the
          * node was added to its parent
@@ -379,6 +395,29 @@ public class FibonacciHeap {
 
         public int getKey() {
             return this.key;
+        }
+
+        public HeapNode next(){
+            return(this.right);
+        }
+
+        public int getDegree(){
+            return(this.degree);
+        }
+        public boolean isMark(){
+            return(this.mark);
+        }
+
+        public HeapNode prev(){
+            return(this.left);
+        }
+
+        public HeapNode getParent(){
+            return(this.parent);
+        }
+
+        public HeapNode getChild() {
+            return child;
         }
 
         /**
@@ -411,6 +450,31 @@ public class FibonacciHeap {
             nonMarked++;
             totalCuts++;
         }
+        public void cut1(HeapNode x, FibonacciHeap h){
+            cascadingCut2(x,h);
+        }
+
+        public void cut2(HeapNode x, FibonacciHeap h){
+            x.parent =  null;
+            x.mark = false;
+            this.degree--;
+            if(x.next()==x){
+                this.child = null;
+            }
+            else{
+                if(this.child == x){
+                    this.child = x.next();
+                }
+                x.left.right = x.next();
+                x.right.left = x.prev();
+                x.left = h.firstNode.left;
+                x.right = h.firstNode;
+                h.firstNode.left = x;
+
+            }
+
+        }
+
 
         /**
          * performs a cascading cut operation
@@ -432,6 +496,19 @@ public class FibonacciHeap {
                     this.mark = true;
                     //updating static fields
                     nonMarked--;
+                }
+            }
+        }
+
+
+        public void cascadingCut2(HeapNode x,FibonacciHeap h){
+            this.cut(x,h);
+            if(this.parent!=null){
+                if(!this.mark){
+                    this.mark = true;
+                }
+                else{
+                    this.parent.cascadingCut2(this,h);
                 }
             }
         }
