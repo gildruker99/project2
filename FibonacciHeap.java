@@ -1,4 +1,3 @@
-import java.util.List;
 
 /**
  * FibonacciHeap
@@ -41,7 +40,7 @@ public class FibonacciHeap {
      * tree which has larger value in its root under the other tree.
      */
     public static int totalLinks() {
-        return totalLinks; // should be replaced by student code
+        return totalLinks;
     }
 
     /**
@@ -54,6 +53,22 @@ public class FibonacciHeap {
      */
     public static int totalCuts() {
         return totalCuts;
+    }
+
+    public HeapNode getFirst(){
+        return this.firstNode;
+    }
+
+    public int getNumOfNodes() {
+        return numOfNodes;
+    }
+
+    public HeapNode getMinNode() {
+        return minNode;
+    }
+
+    public int getNumOfTrees() {
+        return numOfTrees;
     }
 
     /**
@@ -112,8 +127,8 @@ public class FibonacciHeap {
     }
 
 
-    public void KminHelper(int k,HeapNode toCheck){
-        HeapNode toInsert  = new HeapNode(k);
+    public void KminHelper(int key,HeapNode toCheck){
+        HeapNode toInsert  = new HeapNode(key);
         toInsert.kmin = toCheck;
         if(this.isEmpty()){
             this.firstNode = toInsert;
@@ -143,22 +158,6 @@ public class FibonacciHeap {
      */
     public boolean isEmpty() {
         return this.numOfNodes == 0;
-    }
-
-    public HeapNode getFirst() {
-        return this.firstNode;
-    }
-
-    public int getNumOfNodes() {
-        return (this.numOfNodes);
-    }
-
-    public int getNumOfTrees() {
-        return (this.numOfTrees);
-    }
-
-    public HeapNode getMinNode() {
-        return (this.minNode);
     }
 
     /**
@@ -221,9 +220,7 @@ public class FibonacciHeap {
             this.delete1();
             return;
         }
-        if (this.minNode.child != null) {
-            this.delete2();
-        }
+        this.delete2();
     }
 
     /**
